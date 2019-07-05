@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>01.品牌列表案例</title>
+	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+	<link rel="stylesheet" href="lib/bootstrap-3.3.7.css">
+</head>
+<body>
+	<div id="app">
+			<div class="panel panel-primary">
+		      <div class="panel-heading">
+		        <h3 class="panel-title">添加品牌</h3>
+		      </div>
+
+		      <div class="panel-body form-inline">
+			        <label>
+			          Id:
+			          <input type="text" class="form-control" v-model="id">
+			        </label>
+
+			        <label>
+			          Name:
+			          <input type="text" class="form-control" v-model="name" 
+			          @keyup.f2="add">
+			        </label>
+
+			        <!-- 在Vue中，使用事件绑定机制，为元素指定处理函数的时候，如果加了小括号，就可以给函数传参了 -->
+			        <input type="button" value="添加" class="btn btn-primary" @click="add">
+
+			        <label>
+			          搜索名称关键字：
+			          <input type="text" class="form-control" v-model="keywords" v-s-focus v-s-color='"green"'>
+			        </label>
+	      		</div>
+	    	</div>
+		<table class="table table-bordered table-hover table-striped">
+	      <thead>
+	        <tr>
+	          <th>Id</th>
+	          <th>Name</th>
+	          <th>Ctime</th>
+	          <th>Operation</th>
+	        </tr>
+	      </thead>
+	      <tbody>
+	        <tr v-for="(item, i) in search(keywords)" :key="item.id">
+	        	<td>{{item.id}}</td>
+	        	<td>{{item.name}}</td>
+	        	<!-- v-text="item.date | dataFormat()" -->
+	        	<!-- <td>{{item.date | dataFormat}}</td> -->
+	        	<td>{{item.date | dateF}}</td>
+
+	        	<td><a @click="del(item.id)">删除</a></td>
+	        </tr>
+	      </tbody>
+	    </table>
+	</div>
+	<script src="lib/vue.min.js"></script>
+	<script>
+		<!-- 设置全局过滤器 -->
+		Vue.filter('dataFormat',(dataStr,opetion = '') => {
+			var date = new Date();
+			var y = date.getFullYear();
+			var m = (date.getMonth() + 1).toString().padStart(2, '0');
+			var d = date.getDate().toString().padStart(2, '0');
+			if(opetion == 'yyyy-mm-dd') {
+				var h = date.getHours().toString().padStart(2, '0');
+				var mm = date.getMinutes().toString().padStart(2, '0');
+				var s = date.getSeconds().toString().padStart(2, '0');
+				return `${y}-${m}-${d} ${h}:${mm}:${y}`;
+			}
+			return y + '-' + m + '-' + d;
+		});
+
+		// 自定义全局按键修饰符
+		Vue.config.keyCodes.f2 = 113;
+
+		// 定义全局生命函数
+		Vue.directive('focus', {
+			bind:(el) => {},
+			inserted:(el) => {
+				el.focus();
+			},
+			updated:(el) => {}
+		});
+
+		Vue.directive('color',{
+			bind:(el) => {
+				el.style.color = 'red';
+			}
+		});
+
+		var vm = new Vue({
+			el: '#app',
+			data: {
+				list: [
+					{id:'1', name:'zhangsan',date:new Date()},
+					{id:'2', name:'lisi',date:new Date()},
+					{id:'3', name:'wangwu',date:new Date()},
+					{id:'4', name:'zhaoliu',date:new Date()}
+				],
+				id: '',
+				name: '',
+				keywords: ''
+			},
+			methods: {
+				// 数组list方法
+				// splite ---- 向数组的开始处添加一个元素
+				// push ---- 往数组的最后添加一个元素
+				// splice ---- 根据索引删除数组内的元素
+				// foreace ---- 循环遍历数组
+				// filter ----- 循环过滤
+
+				// findIndex ---- 查找特定元素的索引值
+				// some ---- 如果 return true，就会立即终止这个数组的后续循环
+
+
+				add() {
+					var ObjPeo = {id:this.id,name:this.name,date:new Date()}
+					this.list.push(ObjPeo);
+					this.id = '';
+					this.name = '';
+				},
+				del(id) {
+					// alert(id);
+					// 方式一：findIndex
+					/*var index = this.list.findIndex((item,i) => {
+						if(id = item.id) {
+							return true;
+						}
+					});
+					this.list.splice(index, 1);*/
+
+					// 方式二：some
+					this.list.some((item, i) => {
+						if(item.id = id) {
+							this.list.splice(i, 1);
+							return true;
+						}
+					});
+
+				},
+				search(keywords) {
+					// 方法一：foreach
+					/*var newList = [];
+					this.list.forEach((item, i) => {
+						console.log(item.name + '======' +i);
+						if(item.name.indexOf(keywords) != -1) {
+							newList.push(item);
+						}
+					});
+					return newList;*/
+
+					// 方式二：filter
+					return this.list.filter((item, i) => {
+						if(item.name.includes(keywords)) {
+							return item;
+						}
+					});
+				}
+			},
+			filters: {
+				dateF:(dataStr,opetion = '') => {
+					var date = new Date();
+					var y = date.getFullYear();
+					var m = (date.getMonth() + 1).toString().padStart(2, '0');
+					var d = date.getDate().toString().padStart(2, '0');
+					if(opetion == 'yyyy-mm-dd') {
+						var h = date.getHours().toString().padStart(2, '0');
+						var mm = date.getMinutes().toString().padStart(2, '0');
+						var s = date.getSeconds().toString().padStart(2, '0');
+						return `${y}-${m}-${d} ${h}:${mm}:${y}`;
+					}
+					return y + '-' + m + '-' + d;
+				}
+			},
+			directives: {
+				's-focus': {
+					inserted:function(el) {
+						el.focus();
+					}
+				},
+				's-color': {
+					bind: (el,binding) => {
+						console.log(binding.value);
+						el.style.color = binding.value;
+					}
+				}
+			}
+		});
+	</script>
+</body>
+</html>
