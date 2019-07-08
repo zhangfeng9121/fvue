@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>get-post-jsonp</title>
+	<link rel="stylesheet" href="lib/bootstrap-3.3.7.css">
+	<style>
+		[v-cloak]{
+			display: none;
+		}
+	</style>
+</head>
+<body>
+	<div id="app">
+		<button @click="getInfo">点击1</button>
+		<button @click="getJsonp">点击2</button>
+
+		<div class="panel panel-primary" v-if="address" v-cloak>
+	      <div class="panel-heading">
+	        <h3 class="panel-title">天气预报</h3>
+	      </div>
+
+	      <div class="panel-body form-inline">
+		        <div>
+		          地址:
+		          <label class="form-control" v-text="address"> {{address}}</label>
+		        </div>
+
+		        <div>
+		          时间:
+		          <label class="form-control"> {{time}}</label>
+		        </div>
+      		</div>
+    	</div>
+
+    	<table class="table table-bordered table-hover table-striped" v-if="address" v-cloak>
+	      <thead>
+	        <tr>
+	          <th>day</th>
+	          <th>week</th>
+	          <th>wea</th>
+	          <th>tem</th>
+	          <th>tem1</th>
+	          <th>tem2</th>
+	          <th>air_tips</th>
+	        </tr>
+	      </thead>
+	      <tbody>
+	        <tr v-for="(item, i) in list" :key="item.air">
+	        	<td>{{item.day}}</td>
+	        	<td>{{item.week}}</td>
+	        	<td>{{item.wea}}</td>
+	        	<td>{{item.tem}}</td>
+	        	<td>{{item.tem1}}</td>
+	        	<td>{{item.tem2}}</td>
+	        	<td>{{item.air_tips}}</td>
+	        </tr>
+	      </tbody>
+	    </table>
+	</div>
+
+	<script src="lib/vue.min.js"></script>
+	<script src="lib/vue-resource.min.js"></script>
+	<script>
+		var vm = new Vue({
+			el:'#app',
+			data: {
+				msg:'',
+				address: '',
+				time: '',
+				list:[],
+			},
+			methods:{
+				getInfo() {
+					this.$http.get('http://192.168.11.82:8090/CRUD/user/1').then(res => {
+					// this.$http.get('https://www.tianqiapi.com/api/').then(res => {
+						console.log(res.body);
+					});
+				},
+				getJsonp() {
+					this.$http.jsonp('https://www.tianqiapi.com/api/').then(res => {
+						console.log(res.body);
+						var result = res.body;
+						var add = result.country + '-' + result.city;
+						this.address = add;
+						this.time = result.update_time;
+						this.list = result.data;
+					}, error => {
+
+					});
+
+				}
+			}
+		});
+	</script>
+</body>
+</html>
